@@ -1,0 +1,6 @@
+# untracking compiled files
+
+*.so
+*.o
+*.xo
+*.a

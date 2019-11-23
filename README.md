@@ -12,7 +12,16 @@ A minimal module (module.o) implementing a few commands.
 * `DECIMAL.ADD` - adds two numbers together.
 * `DECIMAL.SUBSTRACT` - substract second number from the first one.
 * `DECIMAL.MULTIPLY` - multiply two numbers.  
-* `DECIMAL.QUANTIZE` - quantizing number with given exponent. Rounding - DEC_ROUND_CEILING.
+* `DECIMAL.QUANTIZE` - quantizing number with given exponent and rounding mode. 
+    Possible rounding modes:
+        ROUND_CEILING,             /* round towards +infinity         */
+        ROUND_UP,                  /* round away from 0               */
+        ROUND_HALF_UP,             /* 0.5 rounds up                   */
+        ROUND_HALF_EVEN,           /* 0.5 rounds to nearest even      */
+        ROUND_HALF_DOWN,           /* 0.5 rounds down                 */
+        ROUND_DOWN,                /* round towards 0 (truncate)      */
+        ROUND_FLOOR,               /* round towards -infinity         */
+        ROUND_05UP,                /* round for reround               */
 
 All comand parameters given in strings.
 
@@ -34,8 +43,10 @@ Now run `redis-cli` and try the commands:
 "0"
 127.0.0.1:9979> DECIMAL.MULTIPLY 2 0.1337
 "0.2674"
-127.0.0.1:9979> DECIMAL.QUANTIZE 0.1337 0.001
-"0.133"
+127.0.0.1:9979> DECIMAL.QUANTIZE 0.1337 0.01 ROUND_UP
+"0.14"
+127.0.0.1:6379> DECIMAL.QUANTIZE 0.1337 0.01 ROUND_DOWN
+"0.13"
 ```
 
 or use inside lua script:

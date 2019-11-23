@@ -8,35 +8,15 @@
 #include "decNumber/decNumber.h"
 
 
-int decimalAddition(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    
+int decimalAddition(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {  
     if (argc != 3) {
         return RedisModule_WrongArity(ctx);
     }
     RedisModule_AutoMemory(ctx);
     
-    /*
-    RedisModuleKey *key = RedisModule_OpenKey(ctx, argv[1], REDISMODULE_READ | REDISMODULE_WRITE);
-    if (RedisModule_KeyType(key) != REDISMODULE_KEYTYPE_HASH &&
-        RedisModule_KeyType(key) != REDISMODULE_KEYTYPE_EMPTY) {
-        return RedisModule_ReplyWithError(ctx, REDISMODULE_ERRORMSG_WRONGTYPE);
-    }
-
-    RedisModuleCallReply *currentValueReply = RedisModule_Call(ctx, "HGET", "ss", argv[1], argv[2]);
-    RMUTIL_ASSERT_NOERROR(ctx, currentValueReply);
-    RedisModuleString *currentValueRedisString = RedisModule_CreateStringFromCallReply(currentValueReply);
-    if (!currentValueRedisString) {
-        return 0;
-    }
-    const char *currentValueString = RedisModule_StringPtrLen(currentValueRedisString, NULL);
-    const char *decrementValueString = RedisModule_StringPtrLen(argv[3], NULL);
-    */
-
-    decNumber a, b, result;                  // working numbers
-    decContext set;                  // working context
-    set.traps = 0;
-    set.digits = DECNUMDIGITS;       // 34
-    decContextDefault(&set, DEC_INIT_DECIMAL128);
+    decNumber a, b, result;                             // working numbers
+    decContext set;                                     // working context
+    decContextDefault(&set, DEC_INIT_DECIMAL128);       // settings set.traps = 0, set.digits = 34 while doing this
 
     char string[DECNUMDIGITS+14];    // conversion buffer
     const char *arg1 = RedisModule_StringPtrLen(argv[1], NULL);
@@ -44,57 +24,55 @@ int decimalAddition(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
 
     decNumberFromString(&a, arg1, &set);
     decNumberFromString(&b, arg2, &set);
-
     decNumberAdd(&result, &a, &b, &set);            // result=b+a
     decNumberToString(&result, string);
 
-    /* decNumber resultNum;
-    decNumberSubtract(&resultNum, &currentNum, &decrementNum, &set);
-
-    if (!decNumberIsNegative(&resultNum)) {
-        decNumberToString(&resultNum, resultStr);
-        RedisModuleCallReply *srep =    (ctx, "HSET", "ssc", argv[1], argv[2], resultStr);
-        RMUTIL_ASSERT_NOERROR(ctx, srep);
-
-        RedisModule_ReplyWithStringBuffer(ctx, resultStr, strlen(resultStr));
-        return REDISMODULE_OK;
-    }
-    if (RedisModule_CallReplyType(currentValueReply) == REDISMODULE_REPLY_NULL) {
-        RedisModule_ReplyWithNull(ctx);
-        return REDISMODULE_OK;
-    }
-    */
-
-    //RedisModule_ReplyWithSimpleString(ctx, string);
     RedisModule_ReplyWithStringBuffer(ctx, string, strlen(string));
     return REDISMODULE_OK;
 }
 
 int decimalQuantize(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
-    if (argc != 3) {
+    if (argc != 4) {
         return RedisModule_WrongArity(ctx);
     }
     RedisModule_AutoMemory(ctx);
 
-    decNumber a, exponent, result;          // working numbers
-    decContext set;                  // working context
-    set.traps = 0;
-    set.digits = DECNUMDIGITS;       // 34
-    //TODO: make round (DEC_ROUND_UP..) set from argv[]
-    set.round = DEC_ROUND_CEILING;
-    decContextDefault(&set, DEC_INIT_DECIMAL128);
-    char result_string[DECNUMDIGITS+14];    //string for result
+    char result_string[DECNUMDIGITS+14];            // string for result
+    decNumber a, exponent, result;                  // working numbers
+    decContext set;                                 // working context
+    decContextDefault(&set, DEC_INIT_DECIMAL128);   // settings set.traps = 0, set.digits = 34 while doing this
+    
+    const char *rounding_mode = RedisModule_StringPtrLen(argv[3], NULL);
+    //As we can't use switch for strings:
+    if (strcmp(rounding_mode, "ROUND_CEILING") == 0) {
+        set.round = DEC_ROUND_CEILING;                              /* round towards +infinity         */
+    } else if (strcmp(rounding_mode, "ROUND_UP") == 0) {
+        set.round = DEC_ROUND_UP;                                   /* round away from 0               */
+    } else if (strcmp(rounding_mode, "ROUND_HALF_UP") == 0) {
+        set.round = DEC_ROUND_HALF_UP;                              /* 0.5 rounds up                   */
+    } else if (strcmp(rounding_mode, "ROUND_HALF_EVEN") == 0) {
+        set.round = DEC_ROUND_HALF_EVEN;                            /* 0.5 rounds to nearest even      */
+    } else if (strcmp(rounding_mode, "ROUND_HALF_DOWN") == 0) {
+        set.round = DEC_ROUND_HALF_DOWN;                            /* 0.5 rounds down                 */
+    } else if (strcmp(rounding_mode, "ROUND_DOWN") == 0) {
+        set.round = DEC_ROUND_DOWN;                                 /* round towards 0 (truncate)      */
+    } else if (strcmp(rounding_mode, "ROUND_FLOOR") == 0) {
+        set.round = DEC_ROUND_FLOOR;                                /* round towards -infinity         */
+    } else if (strcmp(rounding_mode, "ROUND_05UP") == 0) {
+        set.round = DEC_ROUND_05UP;                                 /* round for reround               */
+    } else {
+        return RedisModule_ReplyWithSimpleString(ctx, "Wrong rounding type. Use: ROUND_CEILING, ROUND_UP, ROUND_HALF_UP, ROUND_HALF_EVEN, ROUND_HALF_DOWN, ROUND_DOWN, ROUND_FLOOR or ROUND_05UP.");
+    }
 
     const char *arg1 = RedisModule_StringPtrLen(argv[1], NULL); // what we try to quantize
     const char *arg2 = RedisModule_StringPtrLen(argv[2], NULL); // exponent
     decNumberFromString(&a, arg1, &set);
     decNumberFromString(&exponent, arg2, &set);
     decNumberQuantize(&result, &a, &exponent, &set);            // result = quantize(a) with certain exponent 
-    
     decNumberToString(&result, result_string);
+
     RedisModule_ReplyWithStringBuffer(ctx, result_string, strlen(result_string));
     return REDISMODULE_OK;
-
 }
 
 int decimalMultipy(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
@@ -103,20 +81,18 @@ int decimalMultipy(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     }
     RedisModule_AutoMemory(ctx);
     
-    decNumber a, b, result;          // working numbers
-    decContext set;                  // working context
-    set.traps = 0;
-    set.digits = DECNUMDIGITS;       // 34
-    decContextDefault(&set, DEC_INIT_DECIMAL128);
-    char result_string[DECNUMDIGITS+20];    //string for result
+    decNumber a, b, result;                         // working numbers
+    decContext set;                                 // working context
+    decContextDefault(&set, DEC_INIT_DECIMAL128);   // settings set.traps = 0, set.digits = 34 while doing this
+    char result_string[DECNUMDIGITS+20];            //string for result
 
     const char *arg1 = RedisModule_StringPtrLen(argv[1], NULL); // a
     const char *arg2 = RedisModule_StringPtrLen(argv[2], NULL); // b
     decNumberFromString(&a, arg1, &set);
     decNumberFromString(&b, arg2, &set);
     decNumberMultiply(&result, &a, &b, &set);
-    
     decNumberToString(&result, result_string);
+
     RedisModule_ReplyWithStringBuffer(ctx, result_string, strlen(result_string));
     return REDISMODULE_OK;
 }
@@ -127,20 +103,18 @@ int decimalSubstract(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     }
     RedisModule_AutoMemory(ctx);
     
-    decNumber a, b, result;          // working numbers
-    decContext set;                  // working context
-    set.traps = 0;
-    set.digits = DECNUMDIGITS;       // 34
-    decContextDefault(&set, DEC_INIT_DECIMAL128);
-    char result_string[DECNUMDIGITS+20];    //string for result
+    decNumber a, b, result;                         // working numbers
+    decContext set;                                 // working context
+    decContextDefault(&set, DEC_INIT_DECIMAL128);   // settings set.traps = 0, set.digits = 34 while doing this
+    char result_string[DECNUMDIGITS+20];            //string for result
 
     const char *arg1 = RedisModule_StringPtrLen(argv[1], NULL); // a
     const char *arg2 = RedisModule_StringPtrLen(argv[2], NULL); // b
     decNumberFromString(&a, arg1, &set);
     decNumberFromString(&b, arg2, &set);
     decNumberSubtract(&result, &a, &b, &set);
-
     decNumberToString(&result, result_string);
+    
     RedisModule_ReplyWithStringBuffer(ctx, result_string, strlen(result_string));
     return REDISMODULE_OK;
 }
