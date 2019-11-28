@@ -33,10 +33,10 @@ All comand parameters given in strings.
 
 # Quick Start Guide
 
-Here's what you need to do to build your first module:
+Here's what you need to do to build a module:
+1. Run `make` in '/src' directory.
 
-0. Build Redis in a build supporting modules.
-1. Build librmutil and the module by running `make`. (you can also build them seperatly by running `make` in their respective dirs)
+Run this module inside your redis instance:
 2. Run redis loading the module: `/path/to/redis-server --loadmodule ./module.so`
 
 Now run `redis-cli` and try the commands:
