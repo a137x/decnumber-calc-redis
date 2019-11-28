@@ -119,6 +119,50 @@ int decimalSubstract(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     return REDISMODULE_OK;
 }
 
+int decimalDivide(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+    if (argc != 3) {
+        return RedisModule_WrongArity(ctx);
+    }
+    RedisModule_AutoMemory(ctx);
+    
+    decNumber a, b, result;                         // working numbers
+    decContext set;                                 // working context
+    decContextDefault(&set, DEC_INIT_DECIMAL128);   // settings set.traps = 0, set.digits = 34 while doing this
+    char result_string[DECNUMDIGITS+20];            //string for result
+
+    const char *arg1 = RedisModule_StringPtrLen(argv[1], NULL); // a
+    const char *arg2 = RedisModule_StringPtrLen(argv[2], NULL); // b
+    decNumberFromString(&a, arg1, &set);
+    decNumberFromString(&b, arg2, &set);
+    decNumberDivide(&result, &a, &b, &set);
+    decNumberToString(&result, result_string);
+
+    RedisModule_ReplyWithStringBuffer(ctx, result_string, strlen(result_string));
+    return REDISMODULE_OK;
+}
+
+int decimalPower(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+    if (argc != 3) {
+        return RedisModule_WrongArity(ctx);
+    }
+    RedisModule_AutoMemory(ctx);
+    
+    decNumber a, b, result;                         // working numbers
+    decContext set;                                 // working context
+    decContextDefault(&set, DEC_INIT_DECIMAL128);   // settings set.traps = 0, set.digits = 34 while doing this
+    char result_string[DECNUMDIGITS+20];            //string for result
+
+    const char *arg1 = RedisModule_StringPtrLen(argv[1], NULL); // a
+    const char *arg2 = RedisModule_StringPtrLen(argv[2], NULL); // b
+    decNumberFromString(&a, arg1, &set);
+    decNumberFromString(&b, arg2, &set);
+    decNumberPower(&result, &a, &b, &set);
+    decNumberToString(&result, result_string);
+
+    RedisModule_ReplyWithStringBuffer(ctx, result_string, strlen(result_string));
+    return REDISMODULE_OK;
+}
+
 int RedisModule_OnLoad(RedisModuleCtx *ctx) {
     if (RedisModule_Init(ctx, "decimal", 1, REDISMODULE_APIVER_1) == REDISMODULE_ERR) {
         return REDISMODULE_ERR;
@@ -127,5 +171,8 @@ int RedisModule_OnLoad(RedisModuleCtx *ctx) {
     RMUtil_RegisterWriteCmd(ctx, "decimal.quantize", decimalQuantize);
     RMUtil_RegisterWriteCmd(ctx, "decimal.multiply", decimalMultipy);
     RMUtil_RegisterWriteCmd(ctx, "decimal.substract", decimalSubstract);
+    RMUtil_RegisterWriteCmd(ctx, "decimal.divide", decimalDivide);
+    RMUtil_RegisterWriteCmd(ctx, "decimal.power", decimalPower);
+
     return REDISMODULE_OK;
 }

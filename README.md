@@ -7,12 +7,15 @@ DecNumber library used - http://download.icu-project.org/files/decNumber/decNumb
 
 A minimal module (module.o) implementing a few commands.
 
-**For now it includes 4 commands:**
+**For now it includes 6 commands:**
 
 * `DECIMAL.ADD` - adds two numbers together.
 * `DECIMAL.SUBSTRACT` - substract second number from the first one.
 * `DECIMAL.MULTIPLY` - multiply two numbers.  
-* `DECIMAL.QUANTIZE` - quantizing number with given exponent and rounding mode. 
+* `DECIMAL.QUANTIZE` - quantizing number with given exponent and rounding mode.
+* `DECIMAL.DIVIDE` - divide first number by second.
+* `DECIMAL.POWER` - raise a first number to a power of second number.
+
 Possible rounding modes:
 
     |ROUNDING MODE|how it works|
@@ -49,6 +52,16 @@ Now run `redis-cli` and try the commands:
 "0.14"
 127.0.0.1:6379> DECIMAL.QUANTIZE 0.1337 0.01 ROUND_DOWN
 "0.13"
+127.0.0.1:6379> DECIMAL.POWER 10 -8
+"1E-8"
+127.0.0.1:6379> DECIMAL.POWER 10 -3
+"0.001"
+127.0.0.1:6379> DECIMAL.POWER 10 -3.3
+"0.0005011872336272722850015541868849458"
+127.0.0.1:6379> DECIMAL.POWER 1.337 8.08
+"10.45061312363680871642582659256680"
+127.0.0.1:6379> DECIMAL.DIVIDE 10 23
+"0.4347826086956521739130434782608696"
 ```
 
 or use inside lua script:
