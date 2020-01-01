@@ -97,7 +97,7 @@ int decimalMultipy(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     return REDISMODULE_OK;
 }
 
-int decimalSubstract(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
+int decimalSubtract(RedisModuleCtx *ctx, RedisModuleString **argv, int argc) {
     if (argc != 3) {
         return RedisModule_WrongArity(ctx);
     }
@@ -170,7 +170,7 @@ int RedisModule_OnLoad(RedisModuleCtx *ctx) {
     RMUtil_RegisterWriteCmd(ctx, "decimal.add", decimalAddition);
     RMUtil_RegisterWriteCmd(ctx, "decimal.quantize", decimalQuantize);
     RMUtil_RegisterWriteCmd(ctx, "decimal.multiply", decimalMultipy);
-    RMUtil_RegisterWriteCmd(ctx, "decimal.substract", decimalSubstract);
+    RMUtil_RegisterWriteCmd(ctx, "decimal.subtract", decimalSubtract);
     RMUtil_RegisterWriteCmd(ctx, "decimal.divide", decimalDivide);
     RMUtil_RegisterWriteCmd(ctx, "decimal.power", decimalPower);
 

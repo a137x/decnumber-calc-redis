@@ -10,7 +10,7 @@ A minimal module (module.o) implementing a few commands.
 **For now it includes 6 commands:**
 
 * `DECIMAL.ADD` - adds two numbers together.
-* `DECIMAL.SUBSTRACT` - substract second number from the first one.
+* `DECIMAL.SUBTRACT` - subtract second number from the first one.
 * `DECIMAL.MULTIPLY` - multiply two numbers.  
 * `DECIMAL.QUANTIZE` - quantizing number with given exponent and rounding mode.
 * `DECIMAL.DIVIDE` - divide first number by second.
@@ -44,7 +44,7 @@ Now run `redis-cli` and try the commands:
 ```
 127.0.0.1:9979> DECIMAL.ADD 0.1337 0.1337
 "0.2674"
-127.0.0.1:9979> DECIMAL.SUBSTRACT 0.1337 0.1337
+127.0.0.1:9979> DECIMAL.SUBTRACT 0.1337 0.1337
 "0"
 127.0.0.1:9979> DECIMAL.MULTIPLY 2 0.1337
 "0.2674"
