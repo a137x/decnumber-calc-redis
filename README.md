@@ -84,7 +84,6 @@ Each command has a "cluster version"
 
 Also, input parameter for cluster commands a slightly different -- first parameter is always a KEY, redis cluster will route command execution based on which slot this key belongs, next parameters are the same as for non-cluster commands. So, all cluster commands have by one parameter more than non-cluster commands. Cluster commands can be safely used in standalone redis setup, first parameter can be any key from your database, it will be ignored as command can only be executed on that server.
 
-
 Use inside lua script:
 ```
 redis.call("DECIMAL.ADD.C", "Foo", "0.1337", "0.1337")
