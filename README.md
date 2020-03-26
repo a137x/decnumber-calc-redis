@@ -18,16 +18,16 @@ A minimal module (module.o) implementing a few commands.
 
 Possible rounding modes:
 
-    |ROUNDING MODE|how it works|
-    |-------|-------|
-    |ROUND_CEILING|round towards +infinity|
-    |ROUND_UP| round away from 0|
-    |ROUND_HALF_UP| 0.5 rounds up|
-    |ROUND_HALF_EVEN| 0.5 rounds to nearest even|
-    |ROUND_HALF_DOWN| 0.5 rounds down|
-    |ROUND_DOWN| round towards 0 (truncate)|
-    |ROUND_FLOOR| round towards -infinity|
-    |ROUND_05UP| round for reround|
+    | ROUNDING MODE | How it works |
+    | --- | --- |
+    | ROUND_CEILING | round towards +infinity |
+    | ROUND_UP | round away from 0 |
+    | ROUND_HALF_UP | 0.5 rounds up |
+    | ROUND_HALF_EVEN | 0.5 rounds to nearest even |
+    | ROUND_HALF_DOWN | 0.5 rounds down |
+    | ROUND_DOWN | round towards 0 (truncate) |
+    | ROUND_FLOOR | round towards -infinity |
+    | ROUND_05UP | round for reround |
 
 All comand parameters given in strings.
 
